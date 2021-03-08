@@ -78,7 +78,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="AnalysisValidation\AverageRedundantPackets.cs" />
+    <Compile Include="AnalysisValidation\AverageWaitingTime.cs" />
+    <Compile Include="AnalysisValidation\ExpectedEnergyCost.cs" />
     <Compile Include="Computations\Radar.cs" />
+    <Compile Include="Computations\RandomvariableStream.cs" />
     <Compile Include="ControlPlane\NOS\FlowEngin\DownLinkRouting.cs" />
     <Compile Include="ControlPlane\NOS\FlowEngin\UplinkRouting.cs" />
     <Compile Include="ControlPlane\NOS\TC\subgrapgh\Graph.cs" />
@@ -129,6 +133,7 @@
     <Compile Include="Models\Energy\FirstOrderRadioModel.cs" />
     <Compile Include="db\ImportedSensor.cs" />
     <Compile Include="Computations\UnformRandomNumberGenerator.cs" />
+    <Compile Include="Settings.cs" />
     <Compile Include="ui\conts\ListControl.xaml.cs">
       <DependentUpon>ListControl.xaml</DependentUpon>
     </Compile>
