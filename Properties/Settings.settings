@@ -1,5 +1,5 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="MiniSDN.Properties" GeneratedClassName="Settings">
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="SDORP.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
     <Setting Name="ExpoLCnt" Type="System.Double" Scope="User">
@@ -70,6 +70,15 @@
     </Setting>
     <Setting Name="UpdateLossPercentage" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">5</Value>
+    </Setting>
+    <Setting Name="StopSimlationWhen" Type="System.UInt32" Scope="User">
+      <Value Profile="(Default)">10000000</Value>
+    </Setting>
+    <Setting Name="PacketRate" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">0.1</Value>
+    </Setting>
+    <Setting Name="SavePackets" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
     </Setting>
   </Settings>
 </SettingsFile>

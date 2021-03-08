@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
+using System.Linq;
 using SDORP.Dataplane;
 using SDORP.db;
 using SDORP.Intilization;
@@ -22,6 +24,9 @@ using SDORP.ControlPlane.NOS.Visualizating;
 using System.Threading;
 using SDORP.Dataplane.PacketRouter;
 using SDORP.ControlPlane;
+using SDORP.Dataplane.NOS;
+using SDORP.AnalysisValidation;
+
 
 namespace SDORP.ui
 {
@@ -31,7 +36,8 @@ namespace SDORP.ui
     public partial class MainWindow : Window
     {
         public string PacketRate { get; set; }
-        public Int32 stopSimlationWhen = 1000000000; // s by defult.
+        // public Int32 stopSimlationWhen = 1000000000; // s by defult.
+        public Int32 stopSimlationWhen = 10000; // s by defult.
         public DispatcherTimer TimerCounter = new DispatcherTimer();
         public DispatcherTimer RandomSelectSourceNodesTimer = new DispatcherTimer();
         public static double Swith;// sensing feild width.
@@ -1102,6 +1108,225 @@ namespace SDORP.ui
             }
         }
 
+        private void ExperimentalExpectedEnergyCost(object sender, EventArgs e)
+        {
+
+            int index =  Convert.ToInt16(UnformRandomNumberGenerator.GetUniform(PublicParamerters.NumberofNodes - 1));
+            if (index != PublicParamerters.SinkNode.ID)
+            {
+                myNetWork[index].GenerateDataPacket();
+            }
+
+            double Bsum = 0;
+            double Bcount = 0;
+
+            double Asum = 0;
+            double Acount = 0;
+
+            double Dsum = 0;
+            double Dcount = 0;
+            foreach (Packet packet in PublicParamerters.FinishedRoutedPackets)
+            {
+                if (packet.PacketType == PacketType.Beacon)
+                {
+                    Bcount += 1;
+                    Bsum += packet.UsedEnergy_Joule;
+                }
+
+                if (packet.PacketType == PacketType.ACK)
+                {
+                    Acount += 1;
+                    Asum += packet.UsedEnergy_Joule;
+                }
+
+                if (packet.PacketType == PacketType.Data)
+                {
+                    Dcount += 1;
+                    Dsum += packet.UsedEnergy_Joule;
+                }
+            }
+            double Tsum = Bsum + Asum + Dsum;
+            double Tcount = Bcount + Acount + Dcount;
+            double average = Tsum / Tcount;
+            Console.WriteLine("Expected Total UsedEnergy_Joule:" + Tsum);
+            Console.WriteLine("Average Total UsedEnergy_Joule:" + average);
+        }
+
+        private void btn_test_energy_cost(object sender, RoutedEventArgs e)
+        {
+            MenuItem item = sender as MenuItem;
+            string Header = item.Header.ToString();
+            if (Settings.Default.IsIntialized)
+            {
+                RandomSelectSourceNodesTimer.Interval = TimeSpan.FromSeconds(0.00001);
+                RandomSelectSourceNodesTimer.Tick += ExperimentalExpectedEnergyCost;
+                RandomSelectSourceNodesTimer.Start();
+            }
+        }
+
+        public static double ConvertSecondsToMilliseconds(double seconds)
+        {
+            return TimeSpan.FromSeconds(seconds).TotalMilliseconds;
+        }
+
+
+        private void ExperimentalWaitingTimeTest(object sender, EventArgs e)
+        {
+            int index = 1 + Convert.ToInt16(UnformRandomNumberGenerator.GetUniform(PublicParamerters.NumberofNodes - 2));
+            if (index != PublicParamerters.SinkNode.ID)
+            {
+                myNetWork[index].GenerateDataPacket();
+            }
+         
+            double timelength = ConvertSecondsToMilliseconds(PublicParamerters.Periods.ActivePeriod);
+            double WaitingTimeProbability = 0;
+            double denomina = 1;
+            double P4;
+            double P3;
+            double P2;
+            int sub;
+            double B1;
+            int ac = 0;
+            double x = 0;
+            double c = 0;
+            foreach (Packet packet in PublicParamerters.FinishedRoutedPackets)
+            {
+                    foreach (Sensor sen in myNetWork[index].MyForwarders)
+                    {
+                        if (sen.CurrentSensorState == SensorState.Sleep)
+                        {
+                            ac += 0;
+                            B1 = Operations.Combination(myNetWork[index].MyForwarders.Count, ac);
+                            sub = myNetWork[index].MyForwarders.Count - ac;
+                            P2 = Math.Pow((1 / timelength), ac);
+                            P3 = Math.Pow(1 - (1 / timelength), sub);
+                            P4 = B1 * P2 * P3;
+                            WaitingTimeProbability = P4 / denomina;
+                        }
+                    }
+                x += WaitingTimeProbability;
+                c += 1;
+            }     
+            double average = x / c;
+            Console.WriteLine("Experimental Probability of Average Waiting Time:" + average);
+        }
+
+        private void btn_test_waiting_time(object sender, RoutedEventArgs e)
+        {
+            if (Settings.Default.IsIntialized)
+            {
+                RandomSelectSourceNodesTimer.Interval = TimeSpan.FromSeconds(0.00001);
+                RandomSelectSourceNodesTimer.Tick += ExperimentalWaitingTimeTest;
+                RandomSelectSourceNodesTimer.Start();
+            }
+
+        }
+
+
+        private void ExperimentalRedundantPacketsTest1(object sender, EventArgs e)
+        {
+            int index = 1 + Convert.ToInt16(UnformRandomNumberGenerator.GetUniform(PublicParamerters.NumberofNodes - 2));
+            if (index != PublicParamerters.SinkNode.ID)
+            {
+                myNetWork[index].GenerateDataPacket();
+            }
+
+            double timelength = ConvertSecondsToMilliseconds(PublicParamerters.Periods.ActivePeriod);
+            double WaitingTimeProbability1 = 0;
+            double waitingTimeProbability = 0;
+            double P2;
+            double P3;
+            double P4;
+            int sub;
+            double B1;
+            double RedudntantPacketProbability = 0;
+            double CommulativeProbability = 0;
+            double denomina = 1;
+            double P5;
+            double P6;
+            double P7;
+            int sub2;
+            double B2;
+            int ac = 0;
+            int fdcount = 1;
+            double c = 0;
+            int acc = 1;
+            double w1 = 0;
+            double ww1 = 0;
+            double www2 = 0;
+            double w2 = 0;
+            double ww2 = 0;
+            double www3 = 0;
+            double sum = 0;
+            double average = 0;
+
+                foreach (Packet packet in PublicParamerters.FinishedRoutedPackets)
+                {
+
+
+                    if (myNetWork[index].ID != PublicParamerters.SinkNode.ID)
+                    {
+
+
+                        foreach (Sensor sen in myNetWork[index].MyForwarders)
+                        {
+                            if (sen.CurrentSensorState == SensorState.Sleep && sen.ID != PublicParamerters.SinkNode.ID)
+                            {
+                                ac *= 0;
+                                B1 = Operations.Combination(myNetWork[index].MyForwarders.Count, ac);
+                                sub = myNetWork[index].MyForwarders.Count - ac;
+                                P2 = Math.Pow((1 / timelength), ac);
+                                P3 = Math.Pow(1 - (1 / timelength), sub);
+                                P4 = B1 * P2 * P3;
+                                waitingTimeProbability = P4 / denomina;
+                                w1 += 1;
+                                ww1 += waitingTimeProbability;
+                                www2 = ww1 / w1;
+                            }
+
+                        }
+
+
+                    foreach (Sensor sen in myNetWork[index].MyForwarders)
+                        {
+                            //fdcount += 1;
+                            if (sen.CurrentSensorState == SensorState.Active /*&& fdcount == 1*/ && sen.ID != PublicParamerters.SinkNode.ID)
+                            {
+                            if (fdcount == 1)
+                            {
+                                fdcount += 1;
+                                acc *= 1;
+                                B2 = Operations.Combination(myNetWork[index].MyForwarders.Count, acc);
+                                sub2 = myNetWork[index].MyForwarders.Count - acc;
+                                P5 = Math.Pow((1 / timelength), acc);
+                                P6 = Math.Pow(1 - (1 / timelength), sub2);
+                                P7 = B2 * P5 * P6;
+                                WaitingTimeProbability1 = P7 / denomina;
+                                w2 += 1;
+                                ww2 += WaitingTimeProbability1;
+                                www3 = ww2 / w2;
+                            }
+                            }
+
+                        }
+                       // fdcount = 1;                      
+                    }
+                    RedudntantPacketProbability = 1 - (www2 + www3);
+                    sum += RedudntantPacketProbability;
+                    c += 1;
+                    CommulativeProbability = www2 + www3 + RedudntantPacketProbability;
+                }
+            average = sum / c;
+            Console.WriteLine("Experimental Redundant Packet Probability:" + RedudntantPacketProbability);
+            Console.WriteLine("Experimental Average Redundant Packet Probability:" + average);
+        }
+        private void btn_test_redundant_packets(object sender, RoutedEventArgs e)
+        {
+            RandomSelectSourceNodesTimer.Interval = TimeSpan.FromSeconds(0.00001);
+            RandomSelectSourceNodesTimer.Tick += ExperimentalRedundantPacketsTest1;
+            RandomSelectSourceNodesTimer.Start();
+
+        }
     }
 }
 

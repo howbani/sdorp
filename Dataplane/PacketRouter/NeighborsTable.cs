@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using SDORP.Forwarding;
+
 
 namespace SDORP.Dataplane.PacketRouter
 {
@@ -16,7 +18,6 @@ namespace SDORP.Dataplane.PacketRouter
         public int ID { get { return NeiNode.ID; } } // id of candidate.
         public int NCount { get { return NeiNode.NeighborsTable.Count; } }
         // Elementry values:
-
         public double EnergyLP { get; set; } // battry level.
         public double TransmissionEP { get; set; } // Transmission Distance
         public double ExpectedHopsHP { get; set; } // Expected Hops.
@@ -46,12 +47,29 @@ namespace SDORP.Dataplane.PacketRouter
             get
             {
                 double h = (2 * Operations.DistanceBetweenTwoSensors(NeiNode, PublicParamerters.SinkNode)) / Math.Pow(r, 2);
+                double hdist = Operations.DistanceBetweenTwoSensors(SenderNode, PublicParamerters.SinkNode);
                 double max_h1 = 2 * NCount;
                 double max_h2 = 2 * NCount + 1;
                 double max_h3 = max_h1 / max_h2;
                 double max = max_h3 * r;
                 double ehp = h * max;
                 return ehp;
+            }
+        }
+
+        public double NewExpectedNumberofHops
+        {
+            get
+            {
+               // double h = (2 * Operations.DistanceBetweenTwoSensors(NeiNode, PublicParamerters.SinkNode)) / Math.Pow(r, 2);
+                double dist = Operations.DistanceBetweenTwoSensors(NeiNode, PublicParamerters.SinkNode);
+                double max_h1 = 2 * NCount;
+                double max_h2 = 2 * NCount + 1;
+                double max_h3 = max_h1 / max_h2;
+                double max = max_h3 * r;
+                double fx = (2 * max) / Math.Pow(r, 2);
+                double Nehp = fx * dist;
+                return Nehp;
             }
         }
 
@@ -63,6 +81,37 @@ namespace SDORP.Dataplane.PacketRouter
                 double NormalizedHops = ExpectedNumberofHops / (2 * r);
                 return NormalizedHops;
             }
+        }
+
+        public double NewNormalizedExNHP
+        {
+            get
+            {
+               List<double> NList = new List<double>();
+                foreach (NeighborsTableEntry node in SenderNode.NeighborsTable)
+                {
+                    double exp = node.NewExpectedNumberofHops;
+                    NList.Add(exp);
+                }
+                double max = NList.Max();
+                double NewNormalizedHops = NewExpectedNumberofHops / max;
+                return NewNormalizedHops;
+            }
+
+        }
+
+        public void computeMaximum(Sensor inode)
+        {
+            List<double> NList = new List<double>();
+            foreach (NeighborsTableEntry node in SenderNode.NeighborsTable)
+            {
+                double exp = node.NewExpectedNumberofHops;
+                NList.Add(exp);
+               // maximum = Math.Max(node.NewExpectedNumberofHops);
+            }
+
+            NList.Max();
+            //////Console.WriteLine("The maximum among all neighbot is: ", NList.Max());
         }
 
         //double S2D;

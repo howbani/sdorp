@@ -25,6 +25,8 @@ namespace SDORP.Intilization
             return Math.Sqrt(dx + dy);
         }
 
+
+
         /// <summary>
         /// the communication range is overlapped.
         /// 
@@ -122,6 +124,7 @@ namespace SDORP.Intilization
             double x = bast / mack;
             return x;
         }
+
 
 
         private static int Max(int n1,int n2) { if (n1 > n2) return n1; else return n2; }

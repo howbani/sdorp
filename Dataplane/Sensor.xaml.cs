@@ -27,6 +27,50 @@ namespace SDORP.Dataplane
     /// </summary>
     public partial class Sensor : UserControl
     {
+        public Sensor(Sensor source, Sensor dist)
+        {
+           // counter = new NetworkOverheadCounter();
+
+            Packet packet = GeneragtePacket(source, dist);
+            SendPacekt(packet);
+        }
+
+        public Sensor (){ }
+
+        private Packet GeneragtePacket(Sensor sender, Sensor Dist)
+        {
+            /* PublicParamerters.NumberofGeneratedPackets += 1;
+             Packet pck = new Packet();
+             pck.Source = sender;
+             pck.Path = "" + sender.ID;
+             pck.Destination = Dist; // has no destination.
+             pck.PacketType = PacketType.Data;
+            // pck.Branch = null;
+             pck.PID = PublicParamerters.NumberofGeneratedPackets;
+             pck.TimeToLive = Convert.ToInt16((Operations.DistanceBetweenTwoPoints(sender.CenterLocation, Dist.CenterLocation) / (PublicParamerters.CommunicationRangeRadius / 3))); */
+            Packet packet = new Packet();
+            if (Settings.Default.IsIntialized)
+            {
+
+                PublicParamerters.NumberofGeneratedPackets += 1;
+               
+                packet.Path = "" + sender.ID.ToString();
+                packet.TimeToLive = Convert.ToInt16((Operations.DistanceBetweenTwoPoints(sender.CenterLocation, Dist.CenterLocation) / (PublicParamerters.CommunicationRangeRadius / 3)));
+                packet.Source = sender;
+                packet.PacketLength = PublicParamerters.RoutingDataLength;
+                packet.PacketType = PacketType.Data;
+                packet.Destination = Dist;
+                packet.PID = PublicParamerters.NumberofGeneratedPackets;
+                sender.SwichToActive();
+                IdentifySourceNode(sender);
+                // MainWindow.Dispatcher.Invoke(() => MainWindow.lbl_num_of_gen_packets.Content = PublicParamerters.NumberofGeneratedPackets, DispatcherPriority.Normal);
+                //:
+                sender.SendPacekt(packet);
+            }
+            return packet;
+
+
+        }
         #region Commone parameters.
 
         public Radar Myradar;
@@ -701,7 +745,7 @@ namespace SDORP.Dataplane
            
 
             Packet toppacket = WaitingPacketsQueue.Dequeue();
-            Console.WriteLine("NID:" + this.ID + " trying(preamble packet) to sent The  PID:" + toppacket.PID);
+            ////// Console.WriteLine("NID:" + this.ID + " trying(preamble packet) to sent The  PID:" + toppacket.PID);
             toppacket.WaitingTimes += 1;
             PublicParamerters.TotalWaitingTime += 1; // total;
             SendPacekt(toppacket);
@@ -710,10 +754,11 @@ namespace SDORP.Dataplane
                 if(Settings.Default.ShowRadar) Myradar.StopRadio();
 
                 QueuTimer.Stop();
-                Console.WriteLine("NID:" + this.ID + ". Queu Timer is stoped.");
+              //////  Console.WriteLine("NID:" + this.ID + ". Queu Timer is stoped.");
                 MainWindow.Dispatcher.Invoke(() => Ellipse_indicator.Fill = Brushes.Transparent);
                 MainWindow.Dispatcher.Invoke(() => Ellipse_indicator.Visibility = Visibility.Hidden);
             }
+
         }
 
 
@@ -915,7 +960,7 @@ namespace SDORP.Dataplane
                         // sender swich on the redio:
                         //  SwichToActive();
                         ComputeOverhead(packt, EnergyConsumption.Transmit, Reciver);
-                        Console.WriteLine("sucess:" + ID + "->" + Reciver.ID + ". PID: " + packt.PID);
+                       ////// Console.WriteLine("sucess:" + ID + "->" + Reciver.ID + ". PID: " + packt.PID);
                         //flowEntry.MiniFlow.UpLinkStatistics += 1;
                         flowEntry.ControllerUpLinkStatistics += 1;
                         // Reciver.SwichToActive();
@@ -926,10 +971,10 @@ namespace SDORP.Dataplane
                     {
                         // no available node right now.
                         // add the packt to the wait list.
-                        Console.WriteLine("NID:" + ID + " Faild to sent PID:" + packt.PID);
+                       ////// Console.WriteLine("NID:" + ID + " Faild to sent PID:" + packt.PID);
                         WaitingPacketsQueue.Enqueue(packt);
                         QueuTimer.Start();
-                        Console.WriteLine("NID:" + ID + ". Queu Timer is started.");
+                       ////// Console.WriteLine("NID:" + ID + ". Queu Timer is started.");
                         //  SwichToSleep();// this.
                         if (Settings.Default.ShowRadar) Myradar.StartRadio();
                         PublicParamerters.MainWindow.Dispatcher.Invoke(() => Ellipse_indicator.Fill = Brushes.DeepSkyBlue);
@@ -1060,7 +1105,7 @@ namespace SDORP.Dataplane
                 packt.isDelivered = true;
                 PublicParamerters.NumberofDeliveredPacket += 1;
                 PublicParamerters.FinishedRoutedPackets.Add(packt);// should we add it to the packet which should be store in the sink?
-                Console.WriteLine("PID:" + packt.PID + " has been delivered.");
+                //////Console.WriteLine("PID:" + packt.PID + " has been delivered.");
 
                 ComputeOverhead(packt, EnergyConsumption.Recive, null);
 
@@ -1082,7 +1127,7 @@ namespace SDORP.Dataplane
                     PublicParamerters.NumberofDropedPacket += 1;
                     packt.isDelivered = false;
                     PublicParamerters.FinishedRoutedPackets.Add(packt);
-                    Console.WriteLine("PID:" + packt.PID + " has been droped.");
+                   ////// Console.WriteLine("PID:" + packt.PID + " has been droped.");
                     MainWindow.Dispatcher.Invoke(() => MainWindow.lbl_Number_of_Droped_Packet.Content = PublicParamerters.NumberofDropedPacket, DispatcherPriority.Send);
                 }
                 else

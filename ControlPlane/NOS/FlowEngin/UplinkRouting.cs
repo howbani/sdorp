@@ -46,21 +46,21 @@ namespace SDORP.ControlPlane.NOS.FlowEngin
             PublicParamerters.SinkNode.EDC = 0;
             PublicParamerters.SinkNode.MyForwarders = null;
             List<Sensor> temp = new List<Sensor>();
-            //foreach (Sensor i in myNetWork)
-            //{
-            //    if (i.ID != PublicParamerters.SinkNode.ID && isNeighbour(PublicParamerters.SinkNode, i) == true)
-            //    {
-            //        List<Sensor> forwarders = new List<Sensor>();
-            //        i.EDC = 1;
-            //        forwarders.Add(PublicParamerters.SinkNode);
-            //        i.MyForwarders = forwarders;
-            //        temp.Add(i);
-            //    }
-            //}
+           /* foreach (Sensor i in myNetWork)
+            {
+                if (i.ID != PublicParamerters.SinkNode.ID && isNeighbour(PublicParamerters.SinkNode, i) == true)
+                {
+                    List<Sensor> forwarders = new List<Sensor>();
+                    i.EDC = 1;
+                    forwarders.Add(PublicParamerters.SinkNode);
+                    i.MyForwarders = forwarders;
+                    temp.Add(i);
+                }
+            } */
 
             foreach (Sensor i in myNetWork)
             {
-                if (i.ID != PublicParamerters.SinkNode.ID/* && temp.Contains(i) == false*/)
+                if (i.ID != PublicParamerters.SinkNode.ID /*&& temp.Contains(i) == false*/)
                 {
                     i.MyForwarders = new List<Sensor>();
                     i.EDC = FS0;
@@ -149,6 +149,8 @@ namespace SDORP.ControlPlane.NOS.FlowEngin
             }
 
             int Ftheashoeld1 = Convert.ToInt16(Math.Ceiling(Math.Sqrt(1 + n/Math.PI))); // theshold.
+         //   int Ftheashoeld1 = Convert.ToInt16(Math.Ceiling(Math.Sqrt(n))); // theshold.
+
             int forwardersCount1 = 0;
             sender.MyForwarders.Clear();
             foreach (MiniFlowTableEntry MiniNode in sender.MiniFlowTable)
@@ -189,7 +191,7 @@ namespace SDORP.ControlPlane.NOS.FlowEngin
 
 
             double HSum = 0; // sum of h value.
-            double RSum = 0;
+          //  double RSum = 0;
             foreach (NeighborsTableEntry can in sender.NeighborsTable)
             {
                 HSum += can.H;
@@ -231,9 +233,9 @@ namespace SDORP.ControlPlane.NOS.FlowEngin
             foreach (MiniFlowTableEntry MiniEntry in sender.MiniFlowTable)
             {
 
-                MiniEntry.NeighborEntry.EnergyLP = Math.Exp(1 - (1 / Math.Pow(MiniEntry.NeighborEntry.NormalizedEnergy, LControl))) / EnergyLsum;
-                MiniEntry.NeighborEntry.ExpectedHopsHP = 1 - Math.Exp(1 - (1 / Math.Pow(MiniEntry.NeighborEntry.NormalizedExNHP, HControl))) / ExpectedHopSum;
-                MiniEntry.NeighborEntry.TransmissionEP = 1 - Math.Exp(1 - (1 / Math.Pow(MiniEntry.NeighborEntry.NormalizedTransDistance, EControl))) / TransmissionEpSum;
+                MiniEntry.NeighborEntry.EnergyLP = Math.Exp(1 - (1 / Math.Pow(MiniEntry.NeighborEntry.NormalizedEnergy, LControl)))  / EnergyLsum;
+                MiniEntry.NeighborEntry.ExpectedHopsHP = 1 - Math.Exp(1 - (1 / Math.Pow(MiniEntry.NeighborEntry.NormalizedExNHP, HControl)))  / ExpectedHopSum;
+                MiniEntry.NeighborEntry.TransmissionEP = 1 - Math.Exp(1 - (1 / Math.Pow(MiniEntry.NeighborEntry.NormalizedTransDistance, EControl)))  / TransmissionEpSum;
                 MiniEntry.UpLinkPriority = (MiniEntry.NeighborEntry.TransmissionEP + MiniEntry.NeighborEntry.EnergyLP + MiniEntry.NeighborEntry.ExpectedHopsHP) / 3;
 
                 sumAll += MiniEntry.UpLinkPriority;

@@ -83,6 +83,7 @@
                             <MenuItem Click="btn_uplLINK_send_numbr_of_packets"  Header="300" />
                             <MenuItem Click="btn_uplLINK_send_numbr_of_packets"  Header="500" />
                             <MenuItem Click="btn_uplLINK_send_numbr_of_packets"  Header="1000" />
+                            <MenuItem Click="btn_uplLINK_send_numbr_of_packets"  Header="3000" />
                             <MenuItem Click="btn_uplLINK_send_numbr_of_packets"  Header="5000" />
                             <MenuItem Click="btn_uplLINK_send_numbr_of_packets"  Header="10000" />
 
@@ -129,6 +130,13 @@
                             </MenuItem>-->
 
                         </MenuItem>
+                        <MenuItem Header="Simulation Test">
+                            <MenuItem Click="btn_test_energy_cost" Header="Expected Energy Cost" />
+                            <MenuItem Click="btn_test_waiting_time" Header="Waiting Time" />
+                            <MenuItem Click="btn_test_redundant_packets" Header="Redundant Packets" />
+                        </MenuItem>
+ 
+
                     </MenuItem>
 
 

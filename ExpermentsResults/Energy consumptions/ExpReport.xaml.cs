@@ -66,6 +66,8 @@ namespace SDORP.ExpermentsResults.Energy_consumptions
             List.Add(new ValParPair() { Par = "Communication Range Radius", Val = PublicParamerters.CommunicationRangeRadius.ToString()+" m"});
             List.Add(new ValParPair() { Par = "Density", Val = PublicParamerters.Density.ToString()});
             List.Add(new ValParPair() { Par = "Packet Rate", Val = _mianWind.PacketRate });
+            List.Add(new ValParPair() { Par = "Packet Size in Bits", Val = PublicParamerters.RoutingDataLength.ToString() });
+            List.Add(new ValParPair() { Par = "Packet Size in Bytes", Val = PublicParamerters.RoutingDataLength_Bytes.ToString() });
             List.Add(new ValParPair() { Par = "Simulation Time", Val = _mianWind.stopSimlationWhen.ToString()+" s" });
             List.Add(new ValParPair() { Par = "Start up time", Val = PublicParamerters.MacStartUp.ToString() + " s" });
             List.Add(new ValParPair() { Par = "Active Time", Val = PublicParamerters.Periods.ActivePeriod.ToString() + " s" });
